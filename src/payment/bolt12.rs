@@ -20,6 +20,8 @@ use lightning::offers::invoice::Bolt12Invoice;
 use lightning::offers::offer::{Amount, Offer, Quantity};
 use lightning::offers::parse::Bolt12SemanticError;
 use lightning::offers::refund::Refund;
+use lightning::onion_message::dns_resolution::HumanReadableName;
+use lightning::onion_message::messenger::Destination;
 use lightning::util::string::UntrustedString;
 
 use rand::RngCore;
@@ -250,6 +252,72 @@ impl Bolt12Payment {
 						Err(Error::PaymentSendingFailed)
 					},
 				}
+			},
+		}
+	}
+
+	/// Send a payment to an offer resolved from a human-readable name [BIP 353].
+	///
+	/// Paying to human-readable names makes it more intuitive to make payments for offers
+	/// as users can simply send payments to HRNs such as `user@example.com`.
+	///
+	/// This can be used to pay so-called "zero-amount" offers, i.e., an offer that leaves the
+	/// amount paid to be determined by the user.
+	///
+	/// `dns_resolvers` should be a list of node Destinations that are configured for dns resolution (as outlined in bLIP 32).
+	/// These nodes can be found by running a search through the `NetworkGraph` to find nodes that announce the
+	/// `dns_resolver` feature flag.
+	pub fn send_to_human_readable_name(
+		&self, name: &str, amount_msat: u64, dns_resolvers: Vec<Destination>,
+	) -> Result<PaymentId, Error> {
+		let rt_lock = self.runtime.read().unwrap();
+		if rt_lock.is_none() {
+			return Err(Error::NotRunning);
+		}
+
+		let hrn = HumanReadableName::from_encoded(&name).map_err(|_| Error::HrnParsingFailed)?;
+
+		let mut random_bytes = [0u8; 32];
+		rand::thread_rng().fill_bytes(&mut random_bytes);
+		let payment_id = PaymentId(random_bytes);
+		let retry_strategy = Retry::Timeout(LDK_PAYMENT_RETRY_TIMEOUT);
+		let max_total_routing_fee_msat = None;
+
+		match self.channel_manager.pay_for_offer_from_human_readable_name(
+			hrn.clone(),
+			amount_msat,
+			payment_id,
+			retry_strategy,
+			max_total_routing_fee_msat,
+			dns_resolvers,
+		) {
+			Ok(()) => {
+				log_info!(self.logger, "Initiated sending {} msats to {}", amount_msat, name);
+				let kind = PaymentKind::HrnBolt12Offer { hrn };
+				let payment = PaymentDetails::new(
+					payment_id,
+					kind,
+					Some(amount_msat),
+					None,
+					PaymentDirection::Outbound,
+					PaymentStatus::Pending,
+				);
+				self.payment_store.insert(payment)?;
+				Ok(payment_id)
+			},
+			Err(()) => {
+				log_error!(self.logger, "Failed to send payment to {}", name);
+				let kind = PaymentKind::HrnBolt12Offer { hrn };
+				let payment = PaymentDetails::new(
+					payment_id,
+					kind,
+					Some(amount_msat),
+					None,
+					PaymentDirection::Outbound,
+					PaymentStatus::Pending,
+				);
+				self.payment_store.insert(payment)?;
+				Err(Error::PaymentSendingFailed)
 			},
 		}
 	}
