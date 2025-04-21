@@ -16,6 +16,7 @@ use crate::Error;
 use lightning::ln::channelmanager::PaymentId;
 use lightning::ln::msgs::DecodeError;
 use lightning::offers::offer::OfferId;
+use lightning::onion_message::dns_resolution::HumanReadableName;
 use lightning::util::ser::{Readable, Writeable};
 use lightning::util::string::UntrustedString;
 use lightning::{
@@ -436,6 +437,16 @@ pub enum PaymentKind {
 		/// The pre-image used by the payment.
 		preimage: Option<PaymentPreimage>,
 	},
+	/// A payment to a [BOLT 12] 'offer' resolved from a [HumanReadableName] as outlined in [BIP 353] and [bLIP 32].
+	///
+	/// [BOLT 12]: https://github.com/lightning/bolts/blob/master/12-offer-encoding.md
+	/// [HumanReadableName]: crate::lightning::onion_message::dns_resolution::HumanReadableName
+	/// [BIP 353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
+	/// [bLIP 32]: https://github.com/lightning/blips/blob/master/blip-0032.md
+	HrnBolt12Offer {
+		/// The human-readable name used to initiate the payment.
+		hrn: HumanReadableName,
+	},
 }
 
 impl_writeable_tlv_based_enum!(PaymentKind,
@@ -473,6 +484,9 @@ impl_writeable_tlv_based_enum!(PaymentKind,
 		(2, preimage, option),
 		(3, quantity, option),
 		(4, secret, option),
+	},
+	(12, HrnBolt12Offer) => {
+		(0, hrn, required),
 	}
 );
 
