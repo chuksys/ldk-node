@@ -302,6 +302,7 @@ enum NodeError {
 	"InsufficientFunds",
 	"LiquiditySourceUnavailable",
 	"LiquidityFeeTooHigh",
+	"HrnParsingFailed",
 };
 
 dictionary NodeStatus {
@@ -798,3 +799,6 @@ typedef string OrderId;
 
 [Custom]
 typedef string DateTime;
+
+[Custom]
+typedef string HumanReadableName;

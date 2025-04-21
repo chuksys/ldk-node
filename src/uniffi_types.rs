@@ -35,6 +35,7 @@ pub use lightning_types::payment::{PaymentHash, PaymentPreimage, PaymentSecret};
 
 pub use lightning_invoice::{Description, SignedRawBolt11Invoice};
 
+pub use lightning::onion_message::dns_resolution::HumanReadableName;
 pub use lightning_liquidity::lsps1::msgs::ChannelInfo as ChannelOrderInfo;
 pub use lightning_liquidity::lsps1::msgs::{OrderId, OrderParameters, PaymentState};
 
@@ -653,6 +654,18 @@ impl UniffiCustomTypeConverter for DateTime {
 
 	fn from_custom(obj: Self) -> Self::Builtin {
 		obj.to_rfc3339()
+	}
+}
+
+impl UniffiCustomTypeConverter for HumanReadableName {
+	type Builtin = String;
+
+	fn into_custom(val: Self::Builtin) -> uniffi::Result<Self> {
+		HumanReadableName::from_encoded(&val).map_err(|_| Error::HrnParsingFailed.into())
+	}
+
+	fn from_custom(obj: Self) -> Self::Builtin {
+		format!("{}@{}", obj.user(), obj.domain())
 	}
 }
 
