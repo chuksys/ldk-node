@@ -302,6 +302,7 @@ enum NodeError {
 	"InsufficientFunds",
 	"LiquiditySourceUnavailable",
 	"LiquidityFeeTooHigh",
+	"HrnParsingFailed",
 };
 
 dictionary NodeStatus {
@@ -405,6 +406,7 @@ interface PaymentKind {
 	Bolt12Offer(PaymentHash? hash, PaymentPreimage? preimage, PaymentSecret? secret, OfferId offer_id, UntrustedString? payer_note, u64? quantity);
 	Bolt12Refund(PaymentHash? hash, PaymentPreimage? preimage, PaymentSecret? secret, UntrustedString? payer_note, u64? quantity);
 	Spontaneous(PaymentHash hash, PaymentPreimage? preimage);
+	HrnBolt12Offer(HumanReadableName hrn);
 };
 
 [Enum]
@@ -763,3 +765,6 @@ typedef string OrderId;
 
 [Custom]
 typedef string DateTime;
+
+[Custom]
+typedef string HumanReadableName;
