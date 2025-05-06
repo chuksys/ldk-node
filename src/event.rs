@@ -742,7 +742,7 @@ where
 							hash: Some(payment_hash),
 							preimage: payment_preimage,
 							secret: Some(payment_secret),
-							offer_id,
+							offer_id: Some(offer_id),
 							payer_note,
 							quantity,
 						};
