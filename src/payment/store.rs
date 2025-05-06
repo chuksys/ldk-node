@@ -395,7 +395,7 @@ pub enum PaymentKind {
 		/// The secret used by the payment.
 		secret: Option<PaymentSecret>,
 		/// The ID of the offer this payment is for.
-		offer_id: OfferId,
+		offer_id: Option<OfferId>,
 		/// The payer note for the payment.
 		///
 		/// Truncated to [`PAYER_NOTE_LIMIT`] characters.
