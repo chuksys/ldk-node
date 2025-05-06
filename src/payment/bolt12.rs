@@ -105,7 +105,7 @@ impl Bolt12Payment {
 					hash: None,
 					preimage: None,
 					secret: None,
-					offer_id: offer.id(),
+					offer_id: Some(offer.id()),
 					payer_note: payer_note.map(UntrustedString),
 					quantity,
 				};
@@ -130,7 +130,7 @@ impl Bolt12Payment {
 							hash: None,
 							preimage: None,
 							secret: None,
-							offer_id: offer.id(),
+							offer_id: Some(offer.id()),
 							payer_note: payer_note.map(UntrustedString),
 							quantity,
 						};
@@ -211,7 +211,7 @@ impl Bolt12Payment {
 					hash: None,
 					preimage: None,
 					secret: None,
-					offer_id: offer.id(),
+					offer_id: Some(offer.id()),
 					payer_note: payer_note.map(UntrustedString),
 					quantity,
 				};
@@ -236,7 +236,7 @@ impl Bolt12Payment {
 							hash: None,
 							preimage: None,
 							secret: None,
-							offer_id: offer.id(),
+							offer_id: Some(offer.id()),
 							payer_note: payer_note.map(UntrustedString),
 							quantity,
 						};
@@ -293,7 +293,14 @@ impl Bolt12Payment {
 		) {
 			Ok(()) => {
 				log_info!(self.logger, "Initiated sending {} msats to {}", amount_msat, name);
-				let kind = PaymentKind::HrnBolt12Offer { hrn };
+				let kind = PaymentKind::Bolt12Offer { 
+					hash: None, 
+					preimage: None, 
+					secret: None, 
+					offer_id: None,
+					payer_note: None, 
+					quantity: None 
+				};
 				let payment = PaymentDetails::new(
 					payment_id,
 					kind,
@@ -307,7 +314,14 @@ impl Bolt12Payment {
 			},
 			Err(()) => {
 				log_error!(self.logger, "Failed to send payment to {}", name);
-				let kind = PaymentKind::HrnBolt12Offer { hrn };
+				let kind = PaymentKind::Bolt12Offer { 
+					hash: None, 
+					preimage: None, 
+					secret: None, 
+					offer_id: None,
+					payer_note: None, 
+					quantity: None 
+				};
 				let payment = PaymentDetails::new(
 					payment_id,
 					kind,
