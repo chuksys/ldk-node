@@ -847,6 +847,11 @@ impl ArcedNodeBuilder {
 		self.inner.write().unwrap().set_node_alias(node_alias).map(|_| ())
 	}
 
+	/// Sets the default dns_resolvers to be used when sending payments to HRNs.
+	pub fn set_dns_resolvers(&self, dns_resolvers: Vec<Destination>) -> Result<(), BuildError> {
+		self.inner.write().unwrap().set_dns_resolvers(dns_resolvers).map(|_| ());
+	}
+
 	/// Builds a [`Node`] instance with a [`SqliteStore`] backend and according to the options
 	/// previously configured.
 	pub fn build(&self) -> Result<Arc<Node>, BuildError> {
