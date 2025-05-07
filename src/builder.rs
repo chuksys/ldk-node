@@ -47,6 +47,7 @@ use lightning::routing::scoring::{
 	ProbabilisticScorer, ProbabilisticScoringDecayParameters, ProbabilisticScoringFeeParameters,
 };
 use lightning::sign::EntropySource;
+use lightning::onion_message::messenger::Destination;
 
 use lightning::util::persist::{
 	read_channel_monitors, CHANNEL_MANAGER_PERSISTENCE_KEY,
@@ -456,6 +457,12 @@ impl NodeBuilder {
 		let node_alias = sanitize_alias(&node_alias)?;
 
 		self.config.node_alias = Some(node_alias);
+		Ok(self)
+	}
+
+	/// Sets the default dns_resolvers to be used when sending payments to HRNs.
+	pub fn set_dns_resolvers(&mut self, dns_resolvers: Vec<Destination>) -> Result<&mut Self, BuildError> {
+		self.config.dns_resolvers = Some(dns_resolvers);
 		Ok(self)
 	}
 

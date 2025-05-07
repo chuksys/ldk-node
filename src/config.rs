@@ -11,6 +11,7 @@ use crate::logger::LogLevel;
 use crate::payment::SendingParameters;
 
 use lightning::ln::msgs::SocketAddress;
+use lightning::onion_message::messenger::Destination;
 use lightning::routing::gossip::NodeAlias;
 use lightning::util::config::ChannelConfig as LdkChannelConfig;
 use lightning::util::config::MaxDustHTLCExposure as LdkMaxDustHTLCExposure;
@@ -103,7 +104,8 @@ pub const WALLET_KEYS_SEED_LEN: usize = 64;
 /// | `log_level`                            | Debug              |
 /// | `anchor_channels_config`               | Some(..)           |
 /// | `sending_parameters`                   | None               |
-///
+/// | `dns_resolvers`                        | None               |
+/// 
 /// See [`AnchorChannelsConfig`] and [`SendingParameters`] for more information regarding their
 /// respective default values.
 ///
@@ -167,6 +169,11 @@ pub struct Config {
 	/// **Note:** If unset, default parameters will be used, and you will be able to override the
 	/// parameters on a per-payment basis in the corresponding method calls.
 	pub sending_parameters: Option<SendingParameters>,
+	/// The dns_resolver nodes (Destinations) to be used for resolving Human-readable Names.
+	/// 
+	/// If set to `Some`, the values set will be used as dns_resolvers when sending to HRNs.
+	/// **Note:** If set to `None`, payments to HRNs will fail.
+	pub dns_resolvers: Option<Vec<Destination>>,
 }
 
 impl Default for Config {
@@ -181,6 +188,7 @@ impl Default for Config {
 			anchor_channels_config: Some(AnchorChannelsConfig::default()),
 			sending_parameters: None,
 			node_alias: None,
+			dns_resolvers: None,
 		}
 	}
 }
