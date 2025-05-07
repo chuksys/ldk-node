@@ -9,7 +9,7 @@
 //!
 //! [BOLT 12]: https://github.com/lightning/bolts/blob/master/12-offer-encoding.md
 
-use crate::config::LDK_PAYMENT_RETRY_TIMEOUT;
+use crate::config::{Config, LDK_PAYMENT_RETRY_TIMEOUT};
 use crate::error::Error;
 use crate::logger::{log_error, log_info, LdkLogger, Logger};
 use crate::payment::store::{PaymentDetails, PaymentDirection, PaymentKind, PaymentStatus};
@@ -21,7 +21,6 @@ use lightning::offers::offer::{Amount, Offer, Quantity};
 use lightning::offers::parse::Bolt12SemanticError;
 use lightning::offers::refund::Refund;
 use lightning::onion_message::dns_resolution::HumanReadableName;
-use lightning::onion_message::messenger::Destination;
 use lightning::util::string::UntrustedString;
 
 use rand::RngCore;
@@ -41,15 +40,16 @@ pub struct Bolt12Payment {
 	channel_manager: Arc<ChannelManager>,
 	payment_store: Arc<PaymentStore>,
 	logger: Arc<Logger>,
+	config: Arc<Config>,
 }
 
 impl Bolt12Payment {
 	pub(crate) fn new(
 		runtime: Arc<RwLock<Option<Arc<tokio::runtime::Runtime>>>>,
 		channel_manager: Arc<ChannelManager>, payment_store: Arc<PaymentStore>,
-		logger: Arc<Logger>,
+		logger: Arc<Logger>, config: Arc<Config>,
 	) -> Self {
-		Self { runtime, channel_manager, payment_store, logger }
+		Self { runtime, channel_manager, payment_store, logger, config }
 	}
 
 	/// Send a payment given an offer.
@@ -264,11 +264,9 @@ impl Bolt12Payment {
 	/// This can be used to pay so-called "zero-amount" offers, i.e., an offer that leaves the
 	/// amount paid to be determined by the user.
 	///
-	/// `dns_resolvers` should be a list of node Destinations that are configured for dns resolution (as outlined in bLIP 32).
-	/// These nodes can be found by running a search through the `NetworkGraph` to find nodes that announce the
-	/// `dns_resolver` feature flag.
+	/// If `dns_resolvers` in Config is set to `None`, this operation will fail.
 	pub fn send_to_human_readable_name(
-		&self, name: &str, amount_msat: u64, dns_resolvers: Vec<Destination>,
+		&self, name: &str, amount_msat: u64,
 	) -> Result<PaymentId, Error> {
 		let rt_lock = self.runtime.read().unwrap();
 		if rt_lock.is_none() {
@@ -282,6 +280,11 @@ impl Bolt12Payment {
 		let payment_id = PaymentId(random_bytes);
 		let retry_strategy = Retry::Timeout(LDK_PAYMENT_RETRY_TIMEOUT);
 		let max_total_routing_fee_msat = None;
+
+		let dns_resolvers = match &self.config.dns_resolvers {
+			Some(dns_resolvers) => Ok(dns_resolvers.clone()),
+			None => Err(Error::DnsResolversNotConfigured),
+		}?;
 
 		match self.channel_manager.pay_for_offer_from_human_readable_name(
 			hrn.clone(),
