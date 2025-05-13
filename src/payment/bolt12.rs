@@ -23,6 +23,7 @@ use lightning::offers::offer::{Amount, Offer, Quantity};
 use lightning::offers::parse::Bolt12SemanticError;
 use lightning::offers::refund::Refund;
 use lightning::onion_message::dns_resolution::HumanReadableName;
+use lightning::onion_message::messenger::Destination;
 use lightning::util::string::UntrustedString;
 
 use rand::RngCore;
@@ -283,28 +284,35 @@ impl Bolt12Payment {
 		let retry_strategy = Retry::Timeout(LDK_PAYMENT_RETRY_TIMEOUT);
 		let max_total_routing_fee_msat = None;
 
-		let dns_resolvers = match &self.config.dns_resolvers {
+		let dns_resolvers = match &self.config.dns_resolvers_node_ids {
 			Some(dns_resolvers) => Ok(dns_resolvers.clone()),
 			None => Err(Error::DnsResolversNotConfigured),
 		}?;
 
+		let destinations: Vec<Destination> = dns_resolvers
+		.into_iter()
+		.map(|public_key| {
+			Destination::Node(public_key)
+		})
+		.collect();
+		
 		match self.channel_manager.pay_for_offer_from_human_readable_name(
 			hrn.clone(),
 			amount_msat,
 			payment_id,
 			retry_strategy,
 			max_total_routing_fee_msat,
-			dns_resolvers,
+			destinations,
 		) {
 			Ok(()) => {
 				log_info!(self.logger, "Initiated sending {} msats to {}", amount_msat, name);
-				let kind = PaymentKind::Bolt12Offer { 
-					hash: None, 
-					preimage: None, 
-					secret: None, 
+				let kind = PaymentKind::Bolt12Offer {
+					hash: None,
+					preimage: None,
+					secret: None,
 					offer_id: None,
-					payer_note: None, 
-					quantity: None 
+					payer_note: None,
+					quantity: None,
 				};
 				let payment = PaymentDetails::new(
 					payment_id,
@@ -319,13 +327,13 @@ impl Bolt12Payment {
 			},
 			Err(()) => {
 				log_error!(self.logger, "Failed to send payment to {}", name);
-				let kind = PaymentKind::Bolt12Offer { 
-					hash: None, 
-					preimage: None, 
-					secret: None, 
+				let kind = PaymentKind::Bolt12Offer {
+					hash: None,
+					preimage: None,
+					secret: None,
 					offer_id: None,
-					payer_note: None, 
-					quantity: None 
+					payer_note: None,
+					quantity: None,
 				};
 				let payment = PaymentDetails::new(
 					payment_id,
