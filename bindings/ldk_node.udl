@@ -13,6 +13,7 @@ dictionary Config {
 	u64 probing_liquidity_limit_multiplier;
 	AnchorChannelsConfig? anchor_channels_config;
 	SendingParameters? sending_parameters;
+	sequence<PublicKey>? dns_resolvers_node_ids;
 };
 
 dictionary AnchorChannelsConfig {
@@ -93,6 +94,8 @@ interface Builder {
 	void set_announcement_addresses(sequence<SocketAddress> announcement_addresses);
 	[Throws=BuildError]
 	void set_node_alias(string node_alias);
+	[Throws=BuildError]
+	void set_dns_resolvers(sequence<PublicKey> dns_resolvers_node_ids);
 	[Throws=BuildError]
 	Node build();
 	[Throws=BuildError]
@@ -303,6 +306,7 @@ enum NodeError {
 	"LiquiditySourceUnavailable",
 	"LiquidityFeeTooHigh",
 	"HrnParsingFailed",
+	"DnsResolversNotConfigured",
 };
 
 dictionary NodeStatus {
@@ -338,6 +342,7 @@ enum BuildError {
 	"WalletSetupFailed",
 	"LoggerSetupFailed",
 	"NetworkMismatch",
+	"DnsResolversEmpty",
 };
 
 [Trait]
