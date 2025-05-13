@@ -267,7 +267,7 @@ impl Bolt12Payment {
 	/// This can be used to pay so-called "zero-amount" offers, i.e., an offer that leaves the
 	/// amount paid to be determined by the user.
 	///
-	/// If `dns_resolvers` in Config is set to `None`, this operation will fail.
+	/// If `dns_resolvers_node_ids` in Config is set to `None`, this operation will fail.
 	pub fn send_to_human_readable_name(
 		&self, name: &str, amount_msat: u64,
 	) -> Result<PaymentId, Error> {
@@ -289,13 +289,9 @@ impl Bolt12Payment {
 			None => Err(Error::DnsResolversNotConfigured),
 		}?;
 
-		let destinations: Vec<Destination> = dns_resolvers
-		.into_iter()
-		.map(|public_key| {
-			Destination::Node(public_key)
-		})
-		.collect();
-		
+		let destinations: Vec<Destination> =
+			dns_resolvers.into_iter().map(|public_key| Destination::Node(public_key)).collect();
+
 		match self.channel_manager.pay_for_offer_from_human_readable_name(
 			hrn.clone(),
 			amount_msat,

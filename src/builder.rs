@@ -855,7 +855,9 @@ impl ArcedNodeBuilder {
 	}
 
 	/// Sets the default dns_resolvers to be used when sending payments to HRNs.
-	pub fn set_dns_resolvers(&self, dns_resolvers_node_ids: Vec<PublicKey>) -> Result<(), BuildError> {
+	pub fn set_dns_resolvers(
+		&self, dns_resolvers_node_ids: Vec<PublicKey>,
+	) -> Result<(), BuildError> {
 		self.inner.write().unwrap().set_dns_resolvers(dns_resolvers_node_ids).map(|_| ())
 	}
 
