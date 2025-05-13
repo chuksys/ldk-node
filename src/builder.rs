@@ -45,7 +45,6 @@ use lightning::routing::scoring::{
 	ProbabilisticScorer, ProbabilisticScoringDecayParameters, ProbabilisticScoringFeeParameters,
 };
 use lightning::sign::EntropySource;
-use lightning::onion_message::messenger::Destination;
 
 use lightning::util::persist::{
 	read_channel_monitors, CHANNEL_MANAGER_PERSISTENCE_KEY,
@@ -173,6 +172,8 @@ pub enum BuildError {
 	LoggerSetupFailed,
 	/// The given network does not match the node's previously configured network.
 	NetworkMismatch,
+	/// The dns_resolvers list provided for HRN resolution is empty
+	DnsResolversEmpty,
 }
 
 impl fmt::Display for BuildError {
@@ -199,6 +200,9 @@ impl fmt::Display for BuildError {
 			Self::InvalidNodeAlias => write!(f, "Given node alias is invalid."),
 			Self::NetworkMismatch => {
 				write!(f, "Given network does not match the node's previously configured network.")
+			},
+			Self::DnsResolversEmpty => {
+				write!(f, "The dns_resolvers list provided for HRN resolution is empty.")
 			},
 		}
 	}
@@ -459,8 +463,13 @@ impl NodeBuilder {
 	}
 
 	/// Sets the default dns_resolvers to be used when sending payments to HRNs.
-	pub fn set_dns_resolvers(&mut self, dns_resolvers: Vec<Destination>) -> Result<&mut Self, BuildError> {
-		self.config.dns_resolvers = Some(dns_resolvers);
+	pub fn set_dns_resolvers(
+		&mut self, dns_resolvers_node_ids: Vec<PublicKey>,
+	) -> Result<&mut Self, BuildError> {
+		if dns_resolvers_node_ids.is_empty() {
+			return Err(BuildError::DnsResolversEmpty);
+		}
+		self.config.dns_resolvers_node_ids = Some(dns_resolvers_node_ids);
 		Ok(self)
 	}
 
@@ -846,8 +855,8 @@ impl ArcedNodeBuilder {
 	}
 
 	/// Sets the default dns_resolvers to be used when sending payments to HRNs.
-	pub fn set_dns_resolvers(&self, dns_resolvers: Vec<Destination>) -> Result<(), BuildError> {
-		self.inner.write().unwrap().set_dns_resolvers(dns_resolvers).map(|_| ());
+	pub fn set_dns_resolvers(&self, dns_resolvers_node_ids: Vec<PublicKey>) -> Result<(), BuildError> {
+		self.inner.write().unwrap().set_dns_resolvers(dns_resolvers_node_ids).map(|_| ())
 	}
 
 	/// Builds a [`Node`] instance with a [`SqliteStore`] backend and according to the options

@@ -829,6 +829,11 @@ impl Node {
 		self.config.node_alias
 	}
 
+	/// Returns the list of dns_resolvers that will be used to resolve HRNs.
+	pub fn dns_resolvers(&self) -> Option<Vec<PublicKey>> {
+		self.config.dns_resolvers_node_ids.clone()
+	}
+
 	/// Returns a payment handler allowing to create and pay [BOLT 11] invoices.
 	///
 	/// [BOLT 11]: https://github.com/lightning/bolts/blob/master/11-payment-encoding.md
