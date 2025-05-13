@@ -168,7 +168,7 @@ pub struct Config {
 	/// **Note:** If unset, default parameters will be used, and you will be able to override the
 	/// parameters on a per-payment basis in the corresponding method calls.
 	pub sending_parameters: Option<SendingParameters>,
-	/// The dns_resolver node_ids to be used for resolving Human-readable Names.
+	/// The dns_resolvers node_ids to be used for resolving Human-readable Names.
 	///
 	/// If set to `Some`, the values set will be used as dns_resolvers when sending to HRNs.
 	/// **Note:** If set to `None`, payments to HRNs will fail.
