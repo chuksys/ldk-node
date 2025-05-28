@@ -470,7 +470,7 @@ impl_writeable_tlv_based_enum!(PaymentKind,
 		(2, preimage, option),
 		(3, quantity, option),
 		(4, secret, option),
-		(6, offer_id, required),
+		(6, offer_id, option),
 	},
 	(8, Spontaneous) => {
 		(0, hash, required),
@@ -542,6 +542,7 @@ pub(crate) struct PaymentDetailsUpdate {
 	pub direction: Option<PaymentDirection>,
 	pub status: Option<PaymentStatus>,
 	pub confirmation_status: Option<ConfirmationStatus>,
+	pub quantity: Option<u64>,
 }
 
 impl PaymentDetailsUpdate {
@@ -557,6 +558,7 @@ impl PaymentDetailsUpdate {
 			direction: None,
 			status: None,
 			confirmation_status: None,
+			quantity: None,
 		}
 	}
 }
@@ -584,6 +586,11 @@ impl From<&PaymentDetails> for PaymentDetailsUpdate {
 			_ => None,
 		};
 
+		let quantity = match value.kind {
+			PaymentKind::Bolt12Offer { quantity, .. } => quantity,
+			_ => None,
+		};
+
 		Self {
 			id: value.id,
 			hash: Some(hash),
@@ -595,6 +602,7 @@ impl From<&PaymentDetails> for PaymentDetailsUpdate {
 			direction: Some(value.direction),
 			status: Some(value.status),
 			confirmation_status,
+			quantity,
 		}
 	}
 }

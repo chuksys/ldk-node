@@ -1417,8 +1417,20 @@ where
 					);
 				}
 			},
-			LdkEvent::InvoiceReceived { .. } => {
-				debug_assert!(false, "We currently don't handle BOLT12 invoices manually, so this event should never be emitted.");
+			LdkEvent::InvoiceReceived { payment_id, invoice, context: _, responder: _ } => {
+				let update = PaymentDetailsUpdate {
+					hash: Some(Some(invoice.payment_hash())),
+					quantity: invoice.quantity(),
+					..PaymentDetailsUpdate::new(payment_id)
+				};
+
+				match self.payment_store.update(&update) {
+					Ok(_) => {},
+					Err(e) => {
+						log_error!(self.logger, "Failed to access payment store: {}", e);
+						return Err(ReplayEvent());
+					},
+				};
 			},
 			LdkEvent::ConnectionNeeded { node_id, addresses } => {
 				let runtime_lock = self.runtime.read().unwrap();

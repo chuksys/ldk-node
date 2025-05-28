@@ -200,7 +200,7 @@ interface Bolt12Payment {
 	[Throws=NodeError]
 	PaymentId send_using_amount([ByRef]Offer offer, u64 amount_msat, u64? quantity, string? payer_note);
 	[Throws=NodeError]
-	PaymentId send_to_human_readable_name([ByRef]string name, u64 amount_msat);
+	PaymentId send_to_human_readable_name(HumanReadableName hrn, u64 amount_msat);
 	[Throws=NodeError]
 	Offer receive(u64 amount_msat, [ByRef]string description, u32? expiry_secs, u64? quantity);
 	[Throws=NodeError]
@@ -251,6 +251,13 @@ interface LSPS1Liquidity {
 	LSPS1OrderStatus request_channel(u64 lsp_balance_sat, u64 client_balance_sat, u32 channel_expiry_blocks, boolean announce_channel);
 	[Throws=NodeError]
 	LSPS1OrderStatus check_order_status(OrderId order_id);
+};
+
+interface HumanReadableName {
+	[Name=from_encoded]
+	constructor([ByRef] string encoded);
+	string user();
+	string domain();
 };
 
 [Error]

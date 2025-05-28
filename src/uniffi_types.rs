@@ -28,6 +28,7 @@ pub use lightning::ln::types::ChannelId;
 pub use lightning::offers::invoice::Bolt12Invoice;
 pub use lightning::offers::offer::{Offer, OfferId};
 pub use lightning::offers::refund::Refund;
+pub use lightning::onion_message::dns_resolution::HumanReadableName as LdkHumanReadableName;
 pub use lightning::routing::gossip::{NodeAlias, NodeId, RoutingFees};
 pub use lightning::util::string::UntrustedString;
 
@@ -653,6 +654,46 @@ impl UniffiCustomTypeConverter for DateTime {
 
 	fn from_custom(obj: Self) -> Self::Builtin {
 		obj.to_rfc3339()
+	}
+}
+
+pub struct HumanReadableName {
+	pub inner: LdkHumanReadableName,
+}
+
+impl HumanReadableName {
+	/// Returns the underlying HumanReadableName [`LdkHumanReadableName`]
+	pub fn into_inner(&self) -> LdkHumanReadableName {
+		self.inner.clone()
+	}
+
+	pub fn from_encoded(encoded: &str) -> Self {
+		let hrn = match LdkHumanReadableName::from_encoded(encoded) {
+			Ok(hrn) => Ok(hrn),
+			Err(e) => Err(format!("Error creating HRN {:?}", e)),
+		};
+
+		Self { inner: hrn.expect("Error creating HRN") }
+	}
+
+	pub fn user(&self) -> String {
+		self.inner.user().to_string()
+	}
+
+	pub fn domain(&self) -> String {
+		self.inner.domain().to_string()
+	}
+}
+
+impl From<LdkHumanReadableName> for HumanReadableName {
+	fn from(ldk_hrn: LdkHumanReadableName) -> Self {
+		HumanReadableName { inner: ldk_hrn }
+	}
+}
+
+impl From<HumanReadableName> for LdkHumanReadableName {
+	fn from(wrapper: HumanReadableName) -> Self {
+		wrapper.into_inner()
 	}
 }
 
