@@ -8,7 +8,8 @@
 use crate::chain::{ChainSource, DEFAULT_ESPLORA_SERVER_URL};
 use crate::config::{
 	default_user_config, may_announce_channel, AnnounceError, Config, ElectrumSyncConfig,
-	EsploraSyncConfig, DEFAULT_LOG_FILENAME, DEFAULT_LOG_LEVEL, WALLET_KEYS_SEED_LEN,
+	EsploraSyncConfig, HumanReadableNamesConfig, DEFAULT_LOG_FILENAME, DEFAULT_LOG_LEVEL,
+	WALLET_KEYS_SEED_LEN,
 };
 
 use crate::connection::ConnectionManager;
@@ -464,15 +465,10 @@ impl NodeBuilder {
 		Ok(self)
 	}
 
-	/// Sets the default dns_resolvers to be used when sending payments to HRNs.
-	pub fn set_dns_resolvers(
-		&mut self, dns_resolvers_node_ids: Vec<PublicKey>,
-	) -> Result<&mut Self, BuildError> {
-		if dns_resolvers_node_ids.is_empty() {
-			return Err(BuildError::DnsResolversEmpty);
-		}
-		self.config.dns_resolvers_node_ids = Some(dns_resolvers_node_ids);
-		Ok(self)
+	/// Sets the default [`Config::hrn_config`] to be used when sending payments to HRNs.
+	pub fn set_hrn_config(&mut self, hrn_config: HumanReadableNamesConfig) -> &mut Self {
+		self.config.hrn_config = hrn_config;
+		self
 	}
 
 	/// Builds a [`Node`] instance with a [`SqliteStore`] backend and according to the options
@@ -856,11 +852,9 @@ impl ArcedNodeBuilder {
 		self.inner.write().unwrap().set_node_alias(node_alias).map(|_| ())
 	}
 
-	/// Sets the default dns_resolvers to be used when sending payments to HRNs.
-	pub fn set_dns_resolvers(
-		&self, dns_resolvers_node_ids: Vec<PublicKey>,
-	) -> Result<(), BuildError> {
-		self.inner.write().unwrap().set_dns_resolvers(dns_resolvers_node_ids).map(|_| ())
+	/// Sets the default [`Config::hrn_config`] to be used when sending payments to HRNs.
+	pub fn set_hrn_config(&self, hrn_config: HumanReadableNamesConfig) {
+		self.inner.write().unwrap().set_hrn_config(hrn_config);
 	}
 
 	/// Builds a [`Node`] instance with a [`SqliteStore`] backend and according to the options

@@ -13,7 +13,11 @@ dictionary Config {
 	u64 probing_liquidity_limit_multiplier;
 	AnchorChannelsConfig? anchor_channels_config;
 	SendingParameters? sending_parameters;
-	sequence<PublicKey>? dns_resolvers_node_ids;
+	HumanReadableNamesConfig hrn_config;
+};
+
+dictionary HumanReadableNamesConfig {
+	sequence<PublicKey> dns_resolvers_node_ids;
 };
 
 dictionary AnchorChannelsConfig {
@@ -94,8 +98,7 @@ interface Builder {
 	void set_announcement_addresses(sequence<SocketAddress> announcement_addresses);
 	[Throws=BuildError]
 	void set_node_alias(string node_alias);
-	[Throws=BuildError]
-	void set_dns_resolvers(sequence<PublicKey> dns_resolvers_node_ids);
+	void set_hrn_config(HumanReadableNamesConfig hrn_config);
 	[Throws=BuildError]
 	Node build();
 	[Throws=BuildError]

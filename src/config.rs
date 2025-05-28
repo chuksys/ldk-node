@@ -168,11 +168,8 @@ pub struct Config {
 	/// **Note:** If unset, default parameters will be used, and you will be able to override the
 	/// parameters on a per-payment basis in the corresponding method calls.
 	pub sending_parameters: Option<SendingParameters>,
-	/// The dns_resolvers node_ids to be used for resolving Human-readable Names.
-	///
-	/// If set to `Some`, the values set will be used as dns_resolvers when sending to HRNs.
-	/// **Note:** If set to `None`, payments to HRNs will fail.
-	pub dns_resolvers_node_ids: Option<Vec<PublicKey>>,
+	/// Configuration Options for Human-readable Names.
+	pub hrn_config: HumanReadableNamesConfig,
 }
 
 impl Default for Config {
@@ -187,8 +184,25 @@ impl Default for Config {
 			anchor_channels_config: Some(AnchorChannelsConfig::default()),
 			sending_parameters: None,
 			node_alias: None,
-			dns_resolvers_node_ids: None,
+			hrn_config: HumanReadableNamesConfig::default(),
 		}
+	}
+}
+
+/// Configuration options for Human-readable Names
+#[derive(Debug, Clone)]
+pub struct HumanReadableNamesConfig {
+	/// The DNS resolvers to be used for resolving Human-readable Names.
+	///
+	/// If not empty, the values set will be used as DNS resolvers when sending to HRNs.
+	///
+	/// **Note:** If empty, payments to HRNs will fail.
+	pub dns_resolvers_node_ids: Vec<PublicKey>,
+}
+
+impl Default for HumanReadableNamesConfig {
+	fn default() -> Self {
+		Self { dns_resolvers_node_ids: vec![] }
 	}
 }
 
