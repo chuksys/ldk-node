@@ -103,7 +103,7 @@ pub const WALLET_KEYS_SEED_LEN: usize = 64;
 /// | `log_level`                            | Debug              |
 /// | `anchor_channels_config`               | Some(..)           |
 /// | `sending_parameters`                   | None               |
-/// | `dns_resolvers`                        | None               |
+/// | `hrn_config`                           | None               |
 ///
 /// See [`AnchorChannelsConfig`] and [`SendingParameters`] for more information regarding their
 /// respective default values.
@@ -168,8 +168,10 @@ pub struct Config {
 	/// **Note:** If unset, default parameters will be used, and you will be able to override the
 	/// parameters on a per-payment basis in the corresponding method calls.
 	pub sending_parameters: Option<SendingParameters>,
-	/// Configuration Options for Human-readable Names.
-	pub hrn_config: HumanReadableNamesConfig,
+	/// Configuration options for Human-Readable Names ([BIP 353]).
+	///
+	/// [BIP 353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
+	pub hrn_config: Option<HumanReadableNamesConfig>,
 }
 
 impl Default for Config {
@@ -184,7 +186,7 @@ impl Default for Config {
 			anchor_channels_config: Some(AnchorChannelsConfig::default()),
 			sending_parameters: None,
 			node_alias: None,
-			hrn_config: HumanReadableNamesConfig::default(),
+			hrn_config: None,
 		}
 	}
 }
@@ -198,12 +200,6 @@ pub struct HumanReadableNamesConfig {
 	///
 	/// **Note:** If empty, payments to HRNs will fail.
 	pub dns_resolvers_node_ids: Vec<PublicKey>,
-}
-
-impl Default for HumanReadableNamesConfig {
-	fn default() -> Self {
-		Self { dns_resolvers_node_ids: vec![] }
-	}
 }
 
 /// Configuration options pertaining to 'Anchor' channels, i.e., channels for which the

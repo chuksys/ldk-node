@@ -13,7 +13,7 @@ dictionary Config {
 	u64 probing_liquidity_limit_multiplier;
 	AnchorChannelsConfig? anchor_channels_config;
 	SendingParameters? sending_parameters;
-	HumanReadableNamesConfig hrn_config;
+	HumanReadableNamesConfig? hrn_config;
 };
 
 dictionary HumanReadableNamesConfig {
@@ -98,7 +98,6 @@ interface Builder {
 	void set_announcement_addresses(sequence<SocketAddress> announcement_addresses);
 	[Throws=BuildError]
 	void set_node_alias(string node_alias);
-	void set_hrn_config(HumanReadableNamesConfig hrn_config);
 	[Throws=BuildError]
 	Node build();
 	[Throws=BuildError]
@@ -318,7 +317,7 @@ enum NodeError {
 	"LiquiditySourceUnavailable",
 	"LiquidityFeeTooHigh",
 	"HrnParsingFailed",
-	"DnsResolversNotConfigured",
+	"DnsResolversUnavailable",
 };
 
 dictionary NodeStatus {
@@ -354,7 +353,7 @@ enum BuildError {
 	"WalletSetupFailed",
 	"LoggerSetupFailed",
 	"NetworkMismatch",
-	"DnsResolversEmpty",
+	"DnsResolversUnavailable",
 };
 
 [Trait]

@@ -8,8 +8,7 @@
 use crate::chain::{ChainSource, DEFAULT_ESPLORA_SERVER_URL};
 use crate::config::{
 	default_user_config, may_announce_channel, AnnounceError, Config, ElectrumSyncConfig,
-	EsploraSyncConfig, HumanReadableNamesConfig, DEFAULT_LOG_FILENAME, DEFAULT_LOG_LEVEL,
-	WALLET_KEYS_SEED_LEN,
+	EsploraSyncConfig, DEFAULT_LOG_FILENAME, DEFAULT_LOG_LEVEL, WALLET_KEYS_SEED_LEN,
 };
 
 use crate::connection::ConnectionManager;
@@ -175,8 +174,10 @@ pub enum BuildError {
 	LoggerSetupFailed,
 	/// The given network does not match the node's previously configured network.
 	NetworkMismatch,
-	/// The dns_resolvers list provided for HRN resolution is empty
-	DnsResolversEmpty,
+	/// The [`dns_resolvers_node_ids`] provided for HRN resolution is empty.
+	///
+	/// [`dns_resolvers_node_ids`]: crate::config::HumanReadableNamesConfig::dns_resolvers_node_ids
+	DnsResolversUnavailable,
 }
 
 impl fmt::Display for BuildError {
@@ -204,7 +205,7 @@ impl fmt::Display for BuildError {
 			Self::NetworkMismatch => {
 				write!(f, "Given network does not match the node's previously configured network.")
 			},
-			Self::DnsResolversEmpty => {
+			Self::DnsResolversUnavailable => {
 				write!(f, "The dns_resolvers list provided for HRN resolution is empty.")
 			},
 		}
@@ -463,12 +464,6 @@ impl NodeBuilder {
 
 		self.config.node_alias = Some(node_alias);
 		Ok(self)
-	}
-
-	/// Sets the default [`Config::hrn_config`] to be used when sending payments to HRNs.
-	pub fn set_hrn_config(&mut self, hrn_config: HumanReadableNamesConfig) -> &mut Self {
-		self.config.hrn_config = hrn_config;
-		self
 	}
 
 	/// Builds a [`Node`] instance with a [`SqliteStore`] backend and according to the options
@@ -850,11 +845,6 @@ impl ArcedNodeBuilder {
 	/// The provided alias must be a valid UTF-8 string and no longer than 32 bytes in total.
 	pub fn set_node_alias(&self, node_alias: String) -> Result<(), BuildError> {
 		self.inner.write().unwrap().set_node_alias(node_alias).map(|_| ())
-	}
-
-	/// Sets the default [`Config::hrn_config`] to be used when sending payments to HRNs.
-	pub fn set_hrn_config(&self, hrn_config: HumanReadableNamesConfig) {
-		self.inner.write().unwrap().set_hrn_config(hrn_config);
 	}
 
 	/// Builds a [`Node`] instance with a [`SqliteStore`] backend and according to the options
@@ -1507,6 +1497,12 @@ fn build_with_store_internal(
 				return Err(BuildError::ReadFailed);
 			}
 		},
+	};
+
+	if let Some(hrn_config) = &config.hrn_config {
+		if hrn_config.dns_resolvers_node_ids.is_empty() {
+			return Err(BuildError::DnsResolversUnavailable);
+		}
 	};
 
 	let (stop_sender, _) = tokio::sync::watch::channel(());
