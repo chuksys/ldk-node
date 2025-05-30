@@ -206,7 +206,7 @@ impl fmt::Display for BuildError {
 				write!(f, "Given network does not match the node's previously configured network.")
 			},
 			Self::DnsResolversUnavailable => {
-				write!(f, "The dns_resolvers list provided for HRN resolution is empty.")
+				write!(f, "The DNS Resolvers provided for HRN resolution is empty.")
 			},
 		}
 	}
