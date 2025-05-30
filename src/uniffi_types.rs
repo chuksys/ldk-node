@@ -667,13 +667,13 @@ impl HumanReadableName {
 		self.inner.clone()
 	}
 
-	pub fn from_encoded(encoded: &str) -> Self {
+	pub fn from_encoded(encoded: &str) -> Result<Self, Error> {
 		let hrn = match LdkHumanReadableName::from_encoded(encoded) {
 			Ok(hrn) => Ok(hrn),
-			Err(e) => Err(format!("Error creating HRN {:?}", e)),
-		};
+			Err(_) => Err(Error::HrnParsingFailed),
+		}?;
 
-		Self { inner: hrn.expect("Error creating HRN") }
+		Ok(Self { inner: hrn })
 	}
 
 	pub fn user(&self) -> String {

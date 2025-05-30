@@ -280,6 +280,8 @@ impl Bolt12Payment {
 	/// amount paid to be determined by the user.
 	///
 	/// If `dns_resolvers_node_ids` in [`Config.hrn_config`] is empty, this operation will fail.
+	///
+	/// [BIP 353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
 	pub fn send_to_human_readable_name(
 		&self, hrn: HumanReadableName, amount_msat: u64,
 	) -> Result<PaymentId, Error> {
@@ -294,13 +296,14 @@ impl Bolt12Payment {
 		let retry_strategy = Retry::Timeout(LDK_PAYMENT_RETRY_TIMEOUT);
 		let max_total_routing_fee_msat = None;
 
-		let destinations: Vec<Destination> = self
-			.config
-			.hrn_config
-			.dns_resolvers_node_ids
-			.iter()
-			.map(|node_id| Destination::Node(*node_id))
-			.collect();
+		let destinations: Vec<Destination> = match &self.config.hrn_config {
+			Some(hrn_config) => Ok(hrn_config
+				.dns_resolvers_node_ids
+				.iter()
+				.map(|node_id| Destination::Node(*node_id))
+				.collect()),
+			None => Err(Error::DnsResolversUnavailable),
+		}?;
 
 		let hrn = maybe_convert_hrn(hrn);
 
