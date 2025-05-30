@@ -194,7 +194,7 @@ impl Default for Config {
 /// Configuration options for Human-readable Names
 #[derive(Debug, Clone)]
 pub struct HumanReadableNamesConfig {
-	/// The DNS resolvers to be used for resolving Human-readable Names.
+	/// The DNS resolvers to be used for resolving Human-Readable Names.
 	///
 	/// If not empty, the values set will be used as DNS resolvers when sending to HRNs.
 	///
