@@ -37,7 +37,7 @@ type HumanReadableName = Arc<crate::uniffi_types::HumanReadableName>;
 
 #[cfg(not(feature = "uniffi"))]
 pub fn maybe_convert_hrn(hrn: HumanReadableName) -> LdkHumanReadableName {
-	hrn.clone()
+	hrn
 }
 #[cfg(feature = "uniffi")]
 pub fn maybe_convert_hrn(hrn: HumanReadableName) -> LdkHumanReadableName {
@@ -316,7 +316,7 @@ impl Bolt12Payment {
 			destinations,
 		) {
 			Ok(()) => {
-				log_info!(self.logger, "Initiated sending {} msats to {:?}", amount_msat, hrn);
+				log_info!(self.logger, "Initiated sending {} msats to ₿{}@{}", amount_msat, hrn.user(), hrn.domain());
 				let kind = PaymentKind::Bolt12Offer {
 					hash: None,
 					preimage: None,
@@ -337,7 +337,7 @@ impl Bolt12Payment {
 				Ok(payment_id)
 			},
 			Err(()) => {
-				log_error!(self.logger, "Failed to send payment to {:?}", hrn);
+				log_error!(self.logger, "Failed to send payment to ₿{}@{}", hrn.user(), hrn.domain());
 				let kind = PaymentKind::Bolt12Offer {
 					hash: None,
 					preimage: None,

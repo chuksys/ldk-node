@@ -191,7 +191,9 @@ impl Default for Config {
 	}
 }
 
-/// Configuration options for Human-readable Names
+/// Configuration options for Human-Readable Names ([BIP 353]).
+/// 
+/// [BIP 353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
 #[derive(Debug, Clone)]
 pub struct HumanReadableNamesConfig {
 	/// The DNS resolvers to be used for resolving Human-Readable Names.
@@ -323,6 +325,7 @@ pub(crate) fn default_user_config(config: &Config) -> UserConfig {
 	let mut user_config = UserConfig::default();
 	user_config.channel_handshake_limits.force_announced_channel_preference = false;
 	user_config.manually_accept_inbound_channels = true;
+	user_config.manually_handle_bolt12_invoices = true;
 	user_config.channel_handshake_config.negotiate_anchors_zero_fee_htlc_tx =
 		config.anchor_channels_config.is_some();
 

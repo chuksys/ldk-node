@@ -201,7 +201,7 @@ impl fmt::Display for Error {
 				write!(f, "Failed to parse a human-readable name.")
 			},
 			Self::DnsResolversUnavailable => {
-				write!(f, "The given operation failed due to `dns-resolvers` not being configured in builder.")
+				write!(f, "The given operation failed due to DNS resolvers not being configured.")
 			},
 		}
 	}

@@ -1417,7 +1417,7 @@ where
 					);
 				}
 			},
-			LdkEvent::InvoiceReceived { payment_id, invoice, context: _, responder: _ } => {
+			LdkEvent::InvoiceReceived { payment_id, invoice, context, responder: _ } => {
 				let update = PaymentDetailsUpdate {
 					hash: Some(Some(invoice.payment_hash())),
 					quantity: invoice.quantity(),
@@ -1431,6 +1431,8 @@ where
 						return Err(ReplayEvent());
 					},
 				};
+
+				let _ = self.channel_manager.send_payment_for_bolt12_invoice(&invoice, context.as_ref());
 			},
 			LdkEvent::ConnectionNeeded { node_id, addresses } => {
 				let runtime_lock = self.runtime.read().unwrap();
