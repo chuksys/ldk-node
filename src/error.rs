@@ -122,7 +122,7 @@ pub enum Error {
 	LiquidityFeeTooHigh,
 	/// Parsing a Human-Readable Name has failed
 	HrnParsingFailed,
-	/// The given operation failed due to `dns-resolvers` not being configured in builder.
+	/// The given operation failed due to DNS resolvers not being configured.
 	DnsResolversUnavailable,
 }
 
