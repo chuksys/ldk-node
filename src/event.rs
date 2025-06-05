@@ -1432,7 +1432,9 @@ where
 					},
 				};
 
-				let _ = self.channel_manager.send_payment_for_bolt12_invoice(&invoice, context.as_ref());
+				let _ = self
+					.channel_manager
+					.send_payment_for_bolt12_invoice(&invoice, context.as_ref());
 			},
 			LdkEvent::ConnectionNeeded { node_id, addresses } => {
 				let runtime_lock = self.runtime.read().unwrap();

@@ -316,7 +316,13 @@ impl Bolt12Payment {
 			destinations,
 		) {
 			Ok(()) => {
-				log_info!(self.logger, "Initiated sending {} msats to ₿{}@{}", amount_msat, hrn.user(), hrn.domain());
+				log_info!(
+					self.logger,
+					"Initiated sending {} msats to ₿{}@{}",
+					amount_msat,
+					hrn.user(),
+					hrn.domain()
+				);
 				let kind = PaymentKind::Bolt12Offer {
 					hash: None,
 					preimage: None,
@@ -337,7 +343,12 @@ impl Bolt12Payment {
 				Ok(payment_id)
 			},
 			Err(()) => {
-				log_error!(self.logger, "Failed to send payment to ₿{}@{}", hrn.user(), hrn.domain());
+				log_error!(
+					self.logger,
+					"Failed to send payment to ₿{}@{}",
+					hrn.user(),
+					hrn.domain()
+				);
 				let kind = PaymentKind::Bolt12Offer {
 					hash: None,
 					preimage: None,

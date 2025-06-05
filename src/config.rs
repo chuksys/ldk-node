@@ -192,7 +192,7 @@ impl Default for Config {
 }
 
 /// Configuration options for Human-Readable Names ([BIP 353]).
-/// 
+///
 /// [BIP 353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
 #[derive(Debug, Clone)]
 pub struct HumanReadableNamesConfig {

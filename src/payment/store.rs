@@ -404,9 +404,9 @@ pub enum PaymentKind {
 		/// The secret used by the payment.
 		secret: Option<PaymentSecret>,
 		/// The ID of the offer this payment is for.
-		/// 
+		///
 		/// This will be set to `None` when sending payments to Human-Readable Names ([BIP 353]).
-		/// 
+		///
 		/// [BIP 353]: https://github.com/bitcoin/bips/blob/master/bip-0353.mediawiki
 		offer_id: Option<OfferId>,
 		/// The payer note for the payment.
