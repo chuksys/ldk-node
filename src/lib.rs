@@ -1669,6 +1669,7 @@ impl Node {
 	/// # use ldk_node::entropy::{generate_entropy_mnemonic, NodeEntropy};
 	/// # use rand::distr::Alphanumeric;
 	/// # use rand::{rng, Rng};
+	/// # tokio::runtime::Runtime::new().unwrap().block_on(async {
 	/// # let mut config = Config::default();
 	/// # config.network = Network::Regtest;
 	/// # let mut temp_path = std::env::temp_dir();
@@ -1680,6 +1681,7 @@ impl Node {
 	/// # let node_entropy = NodeEntropy::from_bip39_mnemonic(mnemonic, None);
 	/// # let node = builder.build(node_entropy.into()).unwrap();
 	/// node.list_payments_with_filter(|p| p.direction == PaymentDirection::Outbound);
+	/// # });
 	/// ```
 	pub fn list_payments_with_filter<F: FnMut(&&PaymentDetails) -> bool>(
 		&self, f: F,

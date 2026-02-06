@@ -991,11 +991,17 @@ mod tests {
 		let rand_store_id: String = (0..7).map(|_| rng.sample(Alphanumeric) as char).collect();
 		let mut vss_seed = [0u8; 32];
 		rng.fill_bytes(&mut vss_seed);
-		let header_provider = Arc::new(FixedHeaders::new(HashMap::new()));
-		let vss_store =
-			VssStore::new(vss_base_url, rand_store_id, vss_seed, header_provider).unwrap();
+		tokio::task::spawn_blocking(move || {
+			let mut headers = HashMap::new();
+			headers.insert("Authorization".to_string(), "Bearer test".to_string());
+			let header_provider = Arc::new(FixedHeaders::new(headers));
+			let vss_store =
+				VssStore::new(vss_base_url, rand_store_id, vss_seed, header_provider).unwrap();
 
-		do_read_write_remove_list_persist(&vss_store);
-		drop(vss_store)
+			do_read_write_remove_list_persist(&vss_store);
+			drop(vss_store)
+		})
+		.await
+		.unwrap();
 	}
 }
