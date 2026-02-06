@@ -992,7 +992,10 @@ mod tests {
 		let mut vss_seed = [0u8; 32];
 		rng.fill_bytes(&mut vss_seed);
 		tokio::task::spawn_blocking(move || {
-			let header_provider = Arc::new(FixedHeaders::new(HashMap::new()));
+			let mut headers = HashMap::new();
+			let dummy_token = "a".repeat(64);
+			headers.insert("Authorization".to_string(), format!("Bearer {}", dummy_token));
+			let header_provider = Arc::new(FixedHeaders::new(headers));
 			let vss_store =
 				VssStore::new(vss_base_url, rand_store_id, vss_seed, header_provider).unwrap();
 
